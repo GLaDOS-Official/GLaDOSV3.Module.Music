@@ -18,6 +18,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove=".git" />
+    <None Remove=".gitignore" />
+    <None Remove="GLaDOSV3.Module.Music.csproj.DotSettings" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Victoria" Version="5.1.11" />
   </ItemGroup>
 
