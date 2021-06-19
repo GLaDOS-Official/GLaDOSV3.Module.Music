@@ -13,7 +13,7 @@ namespace GLaDOSV3.Module.Music
 {
     public class AudioService
     {
-        public static AudioService service;
+        public static AudioService Service;
         private readonly LavaNode lavaNode;
         private readonly DiscordSocketClient socketClient;
         public AudioService(DiscordSocketClient socketClient)
@@ -157,7 +157,7 @@ namespace GLaDOSV3.Module.Music
             return "Playback resumed.";
 
         }
-        public Task<string> QueueCMD(IGuild guild)
+        public Task<string> QueueCmd(IGuild guild)
         {
             if (!this.lavaNode.IsConnected) return Task.FromResult("Player is offline. Please contact the bot owner.");
             var player = this.GetPlayer(guild);

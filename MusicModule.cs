@@ -71,6 +71,6 @@ namespace GLaDOSV3.Module.Music
         [Command("queue")]
         [Remarks("queue")]
         [RequireContext(ContextType.Guild)]
-        public async Task Queue() => await this.ReplyAsync(await this.musicService.QueueCMD(Context.Guild));
+        public async Task Queue() => await this.ReplyAsync(await this.musicService.QueueCmd(Context.Guild));
     }
 }
