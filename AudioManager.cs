@@ -26,7 +26,7 @@ namespace GLaDOSV3.Module.Music
             });
             this.socketClient = socketClient;
             lavaNode.OnTrackEnded += this.LavaNodeOnOnTrackEnded;
-            socketClient.Disconnected += exception => this.lavaNode.DisconnectAsync();
+            socketClient.Disconnected += this.SocketClient_Disconnected;
             socketClient.Ready += () => this.lavaNode.ConnectAsync();
             this.socketClient.UserVoiceStateUpdated += (user, old, _) =>
             {
@@ -39,6 +39,11 @@ namespace GLaDOSV3.Module.Music
 
         }
 
+        private Task SocketClient_Disconnected(System.Exception arg)
+        {
+            if(this.lavaNode.IsConnected) this.lavaNode.DisconnectAsync();
+            return Task.CompletedTask;
+        }
 
         public LavaPlayer GetPlayer(IGuild guild) => this.lavaNode.HasPlayer(guild) ? this.lavaNode.GetPlayer(guild) : null;
 
