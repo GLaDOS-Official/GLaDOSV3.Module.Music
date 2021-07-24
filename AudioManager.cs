@@ -15,8 +15,8 @@ namespace GLaDOSV3.Module.Music
     {
         public static AudioService Service;
         private readonly LavaNode lavaNode;
-        private readonly DiscordSocketClient socketClient;
-        public AudioService(DiscordSocketClient socketClient)
+        private readonly DiscordShardedClient socketClient;
+        public AudioService(DiscordShardedClient socketClient)
         {
             this.lavaNode = new LavaNode(socketClient, new LavaConfig
             {
@@ -24,10 +24,10 @@ namespace GLaDOSV3.Module.Music
                 Port = 9593,
                 SelfDeaf = true
             });
-            this.socketClient = socketClient;
-            lavaNode.OnTrackEnded += this.LavaNodeOnOnTrackEnded;
-            socketClient.Disconnected += this.SocketClient_Disconnected;
-            socketClient.Ready += () => this.lavaNode.ConnectAsync();
+            this.socketClient              =  socketClient;
+            this.lavaNode.OnTrackEnded        += this.LavaNodeOnOnTrackEnded;
+            socketClient.ShardDisconnected += this.SocketClient_Disconnected;
+            socketClient.ShardReady        += (client) => this.lavaNode.ConnectAsync();
             this.socketClient.UserVoiceStateUpdated += (user, old, _) =>
             {
                 if (old.VoiceChannel == null) return Task.CompletedTask;
@@ -39,7 +39,7 @@ namespace GLaDOSV3.Module.Music
 
         }
 
-        private Task SocketClient_Disconnected(System.Exception arg)
+        private Task SocketClient_Disconnected(System.Exception arg, DiscordSocketClient client)
         {
             if(this.lavaNode.IsConnected) this.lavaNode.DisconnectAsync();
             return Task.CompletedTask;
