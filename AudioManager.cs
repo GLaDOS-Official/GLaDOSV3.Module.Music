@@ -7,28 +7,19 @@ using System.Threading.Tasks;
 using Victoria;
 using Victoria.Enums;
 using Victoria.EventArgs;
-using Victoria.Responses.Rest;
+using Victoria.Responses.Search;
 
 namespace GLaDOSV3.Module.Music
 {
     public class AudioService
     {
         public static AudioService Service;
-        private readonly LavaNode lavaNode;
-        private readonly DiscordShardedClient socketClient;
+        private LavaNode lavaNode;
         public AudioService(DiscordShardedClient socketClient)
         {
-            this.lavaNode = new LavaNode(socketClient, new LavaConfig
-            {
-                Hostname = "127.0.0.1",
-                Port = 9593,
-                SelfDeaf = true
-            });
-            this.socketClient              =  socketClient;
-            this.lavaNode.OnTrackEnded        += this.LavaNodeOnOnTrackEnded;
             socketClient.ShardDisconnected += this.SocketClient_Disconnected;
-            socketClient.ShardReady        += (client) => this.lavaNode.ConnectAsync();
-            this.socketClient.UserVoiceStateUpdated += (user, old, _) =>
+            socketClient.ShardReady += this.InitLavaNode;
+            socketClient.UserVoiceStateUpdated += (user, old, _) =>
             {
                 if (old.VoiceChannel == null) return Task.CompletedTask;
                 var player = this.GetPlayer(old.VoiceChannel.Guild);
@@ -37,6 +28,19 @@ namespace GLaDOSV3.Module.Music
                 return Task.CompletedTask;
             };
 
+        }
+
+        private Task InitLavaNode(DiscordSocketClient socketClient)
+        {
+            this.lavaNode = new LavaNode(socketClient, new LavaConfig
+            {
+                Hostname = "127.0.0.1",
+                Port = 9593,
+                SelfDeaf = true
+            });
+            this.lavaNode.ConnectAsync();
+            this.lavaNode.OnTrackEnded += this.LavaNodeOnOnTrackEnded;
+            return Task.CompletedTask;
         }
 
         private Task SocketClient_Disconnected(System.Exception arg, DiscordSocketClient client)
@@ -78,17 +82,15 @@ namespace GLaDOSV3.Module.Music
             SearchResponse results;
             try
             {
-                if (query.StartsWith("https://soundcloud.com")) results = await this.lavaNode.SearchSoundCloudAsync(query.Remove(0, 23));
-                else if (query.StartsWith("https://music.youtube.com/watch?v=") || query.StartsWith("https://www.youtube.com/watch?v=") || query.StartsWith("https://youtu.be/")) { results = await this.lavaNode.SearchYouTubeAsync(query); if (results.Tracks.Count == 0) results = await this.lavaNode.SearchYouTubeAsync(await GetYoutubeId(query)); }
-                else results = await this.lavaNode.SearchAsync(query);
+                results = await this.lavaNode.SearchAsync(SearchType.YouTube,query);
             }
             catch (HttpRequestException)
             {
                 return "Player is offline. Please contact the bot owner.";
             }
 
-            if (results.LoadStatus == LoadStatus.NoMatches || results.LoadStatus == LoadStatus.LoadFailed) results = await this.lavaNode.SearchYouTubeAsync(query);
-            if (results.LoadStatus == LoadStatus.NoMatches || results.LoadStatus == LoadStatus.LoadFailed || results.Tracks.Count == 0) return "No song found on YT or SC.";
+            if (results.Status == SearchStatus.NoMatches || results.Status == SearchStatus.LoadFailed) results = await this.lavaNode.SearchYouTubeAsync(query);
+            if (results.Status == SearchStatus.NoMatches || results.Status == SearchStatus.LoadFailed || results.Tracks.Count == 0) return "No song found on YT.";
             var track = results.Tracks.FirstOrDefault();
             if (player.PlayerState == PlayerState.Playing || player.PlayerState == PlayerState.Paused)
             {
