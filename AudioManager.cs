@@ -45,7 +45,7 @@ namespace GLaDOSV3.Module.Music
 
         private Task SocketClient_Disconnected(System.Exception arg, DiscordSocketClient client)
         {
-            if(this.lavaNode.IsConnected) this.lavaNode.DisconnectAsync();
+            if(this.lavaNode != null && this.lavaNode.IsConnected) this.lavaNode.DisconnectAsync();
             return Task.CompletedTask;
         }
 
