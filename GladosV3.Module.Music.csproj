@@ -40,4 +40,7 @@
     <Copy SourceFiles="$(TargetPath)" DestinationFolder="..\GLaDOSV3\$(OutDir)\Modules\"></Copy>
     <Copy SourceFiles="Dependencies\Victoria.dll" DestinationFolder="..\GLaDOSV3\$(OutDir)\Dependencies"></Copy>
   </Target>
+  <Target Condition="'$(Configuration)'=='DEBUG'" Name="DebugPostBuild" AfterTargets="PostBuildEvent">
+    <Copy SourceFiles="$(TargetDir)$(TargetName).pdb" DestinationFolder="..\GLaDOSV3\$(OutDir)\Modules"></Copy>
+  </Target>
 </Project>
