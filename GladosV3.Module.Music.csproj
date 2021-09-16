@@ -5,6 +5,8 @@
     <AssemblyVersion>1.0.80.8</AssemblyVersion>
     <FileVersion>1.0.80.8</FileVersion>
     <LangVersion>latest</LangVersion>
+    <AnalysisLevel>preview</AnalysisLevel>
+    <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
